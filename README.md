@@ -1,0 +1,4 @@
+# Pour ouvrir l'application
+Ouvrir depuis un navigateur le fichier homePage.html (Ctrl + o). Vous vouvez ensuite naviguer entre les différentes pages et jouer. 
+# Les règles du jeu
+Pour jouer vous pouvez retrourner des cartes. A chaque fois que vous retournez une carte il est préférable d'attendre 1 ou 2 secondes. Si rien ne se passe, vous pouvez en retourner une autre. Si les cartes que vous aviez retourné se remettent à l'envers c'est que vous avez retourné deux cartes différentes sans que la famille soit complète. Dans ce cas, c'est au tour de l'ordinateur qui va lui aussi retourner des cartes. Quand plus rien de ne passe, si certaines cartes sont encore à l'envers c'est à votre tour. Si toutes les cartes ont été retourneées vous pouvez cliquer sur une carte deja à l'endroit ce qui aura pour effet de réinitialiser le jeu et d'afficher votre score. Vous pouvez à tout moment recommencer une partie en cliquant sur le bouton reset. 

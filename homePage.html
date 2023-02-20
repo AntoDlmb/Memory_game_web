@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Home Page</title>
+    <style>
+      body {
+        background-color: #c4f5f0d8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .container {
+        text-align: center;
+        width: 50%;
+      }
+      h1 {
+        font-size: 36px;
+        margin-bottom: 20px;
+      }
+      img {
+        width: 300px;
+        height: 300px;
+        margin-bottom: 20px;
+        border-radius: 50%;
+      }
+      button {
+        background-color: #e0e0e0;
+        color: goldenrod;
+        font-size: 20px;
+        padding: 10px 20px;
+        margin: 10px;
+        border-radius: 5px;
+        cursor: pointer;
+        border: none;
+      }
+      button:hover {
+        background-color: goldenrod;
+        color: #e0e0e0;
+        transition: background-color 0.3s ease;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Home Page</h1>
+      <img src="./assets/back_card.png" alt="image">
+      <br>
+      <button onclick="window.location.href='./levelSelection.html'">Start</button>
+      <button onclick="window.location.href='./loadPic.html'">Load Picture</button>
+      <button  onclick="window.location.href='./gameOverview.html'">Game Overview</button>
+    </div>
+  </body>
+</html>

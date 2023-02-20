@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+          background-color: lightblue;
+          font-family: Arial, sans-serif;
+        }
+        .memory-grid {
+          display: flex;
+          flex-wrap: wrap;
+          align-items: center;
+          justify-content: space-around;
+        }
+        
+        .memory-card {
+          width: 150px;
+          height: 150px;
+          background-color: white;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          font-size: 36px;
+          border: 1px solid black;
+          border-radius: 10px;
+          box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.2);
+          position: relative;
+        }
+        
+        .memory-card .front{
+          display: flex;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 150px;
+          height: 150px;
+        }
+    
+        .memory-card .back {
+          display: none;
+          position: absolute;
+          top: 0;
+          left: 0;
+          width: 150px;
+          height: 150px;
+        }
+        
+        .memory-card.flipped .front{
+          display: None;
+          justify-content: center;
+          align-items: center;
+        }
+    
+        .memory-card.flipped .back {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        
+        .memory-card img {
+          width: 100%;
+          height: 100%;
+          object-fit: cover;
+        }
+    
+        .reset-button{
+          position: absolute;
+          top: 20%;
+          left: 50%;
+          transform: translateX(-50%);
+          padding: 10px 20px;
+          background-color: blue;
+          color: white;
+          border-radius: 5px;
+          cursor: pointer;
+          box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+          border: none;
+          border-radius: 10px;
+        }
+    
+        h1 {
+          text-align: center;
+          margin: 30px 0;
+        }
+    
+        #score {
+          text-align: center;
+          font-size: 20px;
+          margin: 30px 0;
+        }
+      </style>
+</head>
+<body>
+
+    <div style="display: flex; align-items: center; flex-direction: column;">
+        <h1>Game on</h1>
+        <button class="reset-button">Reset Game</button>
+        <br>
+        <br>
+        <br>
+        <div id="score">Score : 0</div>
+        <br>
+        <br>
+        <br>
+        <div class="memory-grid"></div>
+    </div>
+  <script>
+    let cards = [
+      { front: "assets/cat-test (2).jpeg", back: "assets/back_card.png", label: 'Cat', visible: false },
+      { front: "assets/cat-test (3).jpeg", back: "assets/back_card.png", label: 'Cat', visible: false},
+      { front: "assets/cat-test (4).jpeg", back: "assets/back_card.png", label: 'Cat', visible: false },
+      { front: "assets/Dog-Test (1).jpeg", back: "assets/back_card.png", label: 'Dog', visible: false},
+      { front: "assets/Dog-Test (2).jpeg", back: "assets/back_card.png", label: 'Dog', visible: false },
+      { front: "assets/Elephant-Test (1).jpeg", back: "assets/back_card.png", label: 'Elephant', visible: false },
+      { front: "assets/Elephant-Test (4).jpeg", back: "assets/back_card.png", label: 'Elephant', visible: false },
+      { front: "assets/Gorilla (4).jpeg", back: "assets/back_card.png", label: 'Gorilla', visible: false },
+      { front: "assets/Gorilla (5).jpeg", back: "assets/back_card.png", label: 'Gorilla', visible: false },
+      { front: "assets/Gorilla (6).jpeg", back: "assets/back_card.png", label: 'Gorilla', visible: false },
+      { front: "assets/Gorilla (7).jpeg", back: "assets/back_card.png", label: 'Gorilla', visible: false }
+    ];
+
+    cards.sort(() => Math.random() - 0.5);
+
+
+    let computerPlayerMemory = [
+    ];
+
+    for (var i = 0 ; i<cards.length ; i++){
+        computerPlayerMemory.push("unkw");
+    }
+
+    let playerTurn = true;
+    let score = 0;
+    let levelComputer = "easy";
+
+    // cette fonction s'occupe de définir le niveau de l'ordinateur
+    window.onload = function() {
+			var queryString = window.location.search;
+			var urlParams = new URLSearchParams(queryString);
+			var level = urlParams.get('level');
+            levelComputer=level;
+			console.log(levelComputer);
+	}
+
+    // cette fonction réinitialise le jeu
+    const resetButton = document.querySelector(".reset-button");
+        resetButton.addEventListener("click", () => {
+        cards.forEach(card => card.visible = false);
+        updateGameBoard(cards);
+        score = 0;
+        var scoreElement = document.getElementById("score");
+        scoreElement.innerHTML = `Score: ${score}`;
+        computerPlayerMemory.forEach(element => element = "unkw");
+        cards.sort(() => Math.random() - 0.5);
+
+  });
+
+
+  // cette fonction va afficher dans le console l'ensemble des labels qui sont visible sur le gameboard
+    function displayVisibleLabels(cards) {
+        const visibleCards = cards.filter(card => card.visible === true);
+        visibleCards.forEach(card => console.log(card.label));
+    }
+
+    //cette fonction indique si une famille est trouvée
+    function familyFound(cards, family){
+        const familyCards = cards.filter(card => card.label === family);
+        found = true;
+        for (const card of familyCards){
+            found = found && card.visible;
+        }
+        return found;
+    }
+
+    //cette fonction se base sur la conf visibles et non visibles des cartes actuelles pour savoir si il est possible de retirer une carte ou pas 
+    function isItAMatch(cards){
+        const visibleCards = cards.filter(card => card.visible === true);
+        const visibleCardsNotFound = [];
+        for (const card of visibleCards){
+            if (!familyFound(cards, card.label)){
+                visibleCardsNotFound.push(card);
+            }
+        }
+        if (visibleCardsNotFound.length>0){
+            labelRef = visibleCardsNotFound[0].label;
+        }
+        
+        match = true;
+        for (const card of visibleCardsNotFound){
+            if (card.label !== labelRef){
+                match =false;
+            }
+        }
+        if (!match){
+            playerTurn = !playerTurn;
+            visibleCardsNotFound.forEach(card => card.visible=false);
+        }
+    }
+
+    //cette fonction va retourner les cartes du jeu qui sont visibles dans la liste des cartes données
+    async function updateGameBoard(cards){
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        for (const card of cards) {
+            const currentCard = document.querySelector(`[src='${card.front}']`).parentElement.parentElement;
+            if (!card.visible) {
+                currentCard.classList.add("flipped");
+            }else{
+                currentCard.classList.remove("flipped");
+            }
+        }
+    }
+
+    // cette fonction permet d'obtenir une liste de listes d'index correspondant aux indexes ayant le même label
+    function findMatch(tableau){
+        const indexElementsIdentiques = [];
+        const labelAlreadyDone = [];
+        for (let i = 0; i < tableau.length; i++) {
+            const currentIdentiqueElement = [];
+            if (tableau[i] in labelAlreadyDone || tableau[i]=="unkw"){
+                continue;
+            }else{
+                labelAlreadyDone.push(tableau[i]);
+                currentIdentiqueElement.push(i);
+            }
+            for (let j = i + 1; j < tableau.length; j++) {
+                if (tableau[i] === tableau[j] && tableau[j]!=="unkw") {
+                    currentIdentiqueElement.push(j);
+                }
+            }
+            if (currentIdentiqueElement.length>1){
+                indexElementsIdentiques.push(currentIdentiqueElement);
+            }
+            
+        }
+        return indexElementsIdentiques;
+    }
+
+    // cette fonction permet de simuler une perte de mémoire de l'ordinateur pour le niveau medium
+    function memoryLapse(){
+        res = [];
+        let i = 0;
+        for (const element of computerPlayerMemory){
+            let newVal = element;
+            //l'ordinateur oublie 50% des cartes qui sont retounées
+            if (Math.random()>0.5 && !cards[i].visible ){
+                newVal = "unkw";
+            }
+            res.push(newVal);
+            i = i+1; 
+        }
+        return res;
+    }
+
+    // cette fonction va retourner une liste de liste d'indexes pour lesquelles il y a au moins un élément qui n'est pas retourné
+    function filterFamilyNotFound(tabOfIndexes){
+        const indexCardsToTurn = []
+        for (const indexes of tabOfIndexes){
+            if (!familyFound(cards, computerPlayerMemory[indexes[0]])){
+                indexCardsToTurn.push(indexes);
+            }
+        }
+        return indexCardsToTurn;
+    }
+
+    // cette fonction permet de sélectionner une carte à retounrner selon le niveau de l'ordinateur
+    function selectCardToTurn(level){
+        const notVisibleCards = cards.filter(card => card.visible === false);
+        if (notVisibleCards.length>0){
+            if(level=="easy"){
+                const randomIndex = Math.floor(Math.random() * notVisibleCards.length);
+                return notVisibleCards[randomIndex];
+            }else if (level=="medium") {
+                //we simualte a partial loss of memory
+                const memoryMedium = memoryLapse();
+                const sameCards = findMatch(memoryMedium);
+                const familyIndexes = filterFamilyNotFound(sameCards);
+                if (familyIndexes.length>0){
+                    familyIndexes.sort((a, b) => {return b.length - a.length;});
+                    const selectedFamily = familyIndexes[0];
+                    for (const cardIndex of selectedFamily){
+                        if (!cards[cardIndex].visible){
+                            return cards[cardIndex];
+                    }
+                }
+                }
+                console.log("random")
+                // si l'ordinateur ne peut retourner aucune carte avec sa mémoire alors il en choisit une au hasard parmi celles qu'il ne connais pas
+                let randomIndex = Math.floor(Math.random() * notVisibleCards.length);
+                if ("unkw" in computerPlayerMemory){
+                    while (computerPlayerMemory[randomIndex]!=="unkw"){
+                        randomIndex = Math.floor(Math.random() * notVisibleCards.length);
+                    }
+                }
+                
+                return notVisibleCards[randomIndex];
+            }else{
+                const sameCards = findMatch(computerPlayerMemory);
+                const familyIndexes = filterFamilyNotFound(sameCards);
+                console.log(familyIndexes);
+                if (familyIndexes.length>0){
+                    familyIndexes.sort((a, b) => {return b.length - a.length;});
+                    const selectedFamily = familyIndexes[0];
+                    for (const cardIndex of selectedFamily){
+                        if (!cards[cardIndex].visible){
+                            console.log(cardIndex);
+                            return cards[cardIndex];
+                    }
+                }
+                }
+                console.log("random")
+                // si l'ordinateur ne peut retourner aucune carte avec sa mémoire alors il en choisit une au hasard parmi celles qu'il ne connais pas
+                let randomIndex = Math.floor(Math.random() * notVisibleCards.length);
+                if ("unkw" in computerPlayerMemory){
+                    while (computerPlayerMemory[randomIndex]!=="unkw"){
+                        randomIndex = Math.floor(Math.random() * notVisibleCards.length);
+                    }
+                }
+                
+                return notVisibleCards[randomIndex];
+            }
+        }
+        console.log("All cards are already flipped");
+        console.log(notVisibleCards);
+    }
+
+    function computerFlipCard(){
+        const notVisibleCards = cards.filter(card => card.visible === false);
+        if (notVisibleCards.length>0){
+            selectedCard = selectCardToTurn(levelComputer);
+            selectedCard.visible = true; 
+            computerPlayerMemory[cards.indexOf(selectedCard)]=selectedCard.label;
+        }else{
+            playerTurn=true;
+        }
+        
+    }
+
+    // cette fonction correpond à l'ensemble des actions faites par l'ordinateur lorsque c'est son tour
+    async function computerPlays(){
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        while(!playerTurn){
+            console.log("computer turn");
+            computerFlipCard();
+            updateGameBoard(cards);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            isItAMatch(cards);
+            updateGameBoard(cards);
+        }
+        
+    }
+    
+    // cette fonction permet de mettre à jour le score de l'utilisateur 
+    // Le score correpsond au nombre de cartes obtenus par le joueur (une famille est obtenue lorque toutes les cartes de la même famille sont retournées)
+    function updateScore(currentCard){
+        const familyCards = cards.filter(card => card.label === currentCard.label);
+        familyFormed = true;
+        for (const card of familyCards){
+            familyFormed = familyFormed && card.visible;
+        }
+        if (familyFormed){
+            score = score + familyCards.length;
+
+        }
+        var scoreElement = document.getElementById("score");
+        scoreElement.innerHTML = `Score: ${score}`;
+        
+    }
+    //cette fonction vérifie simplement si c'est la fin du jeu et affiche le score si c'est le cas
+    function checkEndGame(){
+        const visibleCards = cards.filter(card => card.visible === true);
+        const scoreTotal = 100*score/visibleCards.length;
+        if (visibleCards.length===cards.length){
+            alert(`End of the game, total score: ${scoreTotal}%`);
+            cards.forEach(card => card.visible = false);
+            updateGameBoard(cards);
+            score = 0;
+            var scoreElement = document.getElementById("score");
+            scoreElement.innerHTML = `Score: ${score}`;
+            computerPlayerMemory.forEach(element => element = "unkw");
+            cards.sort(() => Math.random() - 0.5);
+        }
+    }
+
+
+    const memoryGrid = document.querySelector(".memory-grid");
+    const createCard = (front, back, label, visible) => {
+        const card = document.createElement("div");
+        card.classList.add("memory-card");
+        if (!visible) {
+            card.classList.add("flipped");
+        }
+        card.innerHTML = `
+            <div class="front"><img src="${front}" /></div>
+            <div class="back"><img src="${back}" /></div>
+        `;
+        //c'est lorsqu'on clique sur une carte que toutes les fonctions définies précédement sont utilisées
+        card.addEventListener("click", function() {
+            checkEndGame();
+            const currentCard = cards.find((card) => card.front === front );
+            currentCard.visible = !currentCard.visible;
+            computerPlayerMemory[cards.indexOf(currentCard)]=currentCard.label;
+            updateScore(currentCard);
+            card.classList.toggle("flipped");
+            //displayVisibleLabels(cards);
+            isItAMatch(cards);
+
+            updateGameBoard(cards); 
+            computerPlays();
+            //displayVisibleLabels(cards);
+            console.log(computerPlayerMemory);
+        });
+        return card;
+    };
+
+    
+    for (const card of cards) {
+        memoryGrid.appendChild(createCard(card.front, card.back, card.label, card.visible));
+    }
+
+  </script>
+</body>
+</html>
